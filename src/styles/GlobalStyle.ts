@@ -1,49 +1,45 @@
 import { createGlobalStyle, DefaultTheme } from 'styled-components';
+import { Theme } from './theme';
 
-export const GlobalStyle = createGlobalStyle`
+export const GlobalStyle = createGlobalStyle<{ theme: Theme & DefaultTheme }>`
   * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
   }
 
-  body {
-    background-color: ${props => props.theme.colors.background};
-    color: ${props => props.theme.colors.text.primary};
-    font-family: 'Gowun Batang', serif;
-    transition: all 0.3s ease-in-out;
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    color: ${props => props.theme.colors.text.primary};
-    font-family: 'Grandiflora One', serif;
-  }
-
-  button {
-    background-color: ${props => props.theme.colors.surface};
-    color: ${props => props.theme.colors.text.primary};
-    border: 1px solid ${props => props.theme.colors.border};
-    padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.md};
-    cursor: pointer;
-    border-radius: 4px;
-    transition: all 0.2s ease-in-out;
-
-    &:hover {
-      background-color: ${props => props.theme.colors.primary};
-      color: ${props => props.theme.colors.onPrimary};
+  html {
+    font-size: 16px;
+    
+    ${props => props.theme.breakpoints.mobile} {
+      font-size: 14px;
     }
   }
 
-  input {
-    background-color: ${props => props.theme.colors.surface};
+  body {
+    background-color: ${props => props.theme.colors.background};
     color: ${props => props.theme.colors.text.primary};
-    border: 1px solid ${props => props.theme.colors.border};
-    padding: ${props => props.theme.spacing.sm};
-    border-radius: 4px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+      Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    line-height: 1.5;
+  }
 
-    &:focus {
-      outline: none;
-      border-color: ${props => props.theme.colors.primary};
+  input, select, button {
+    font-size: inherit;
+    font-family: inherit;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    
+    ${props => props.theme.breakpoints.mobile} {
+      display: block;
+      overflow-x: auto;
     }
   }
 `;

@@ -36,16 +36,17 @@ export const convertCurrency = (
   toCurrency: Currency
 ): number => {
   const exchangeRates: Record<Currency, number> = {
-    '원': 1,
+    '원화': 1,
     '달러': 1300, // 예시 환율
-    '엔': 9.5    // 예시 환율
+    '엔화': 9.5,  // 예시 환율
+    '유로화': 1400 // 예시 환율
   };
 
-  const amountInWon = fromCurrency === '원' 
+  const amountInWon = fromCurrency === '원화'
     ? amount 
     : amount * exchangeRates[fromCurrency];
   
-  return toCurrency === '원' 
+  return toCurrency === '원화'
     ? amountInWon 
     : amountInWon / exchangeRates[toCurrency];
 };

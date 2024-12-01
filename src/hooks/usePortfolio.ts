@@ -1,16 +1,21 @@
+import { useState } from 'react';
 import { useLocalStorage } from './useLocalStorage';
 import { PortfolioState, StockType, TotalAmountType } from '@/types/portfolio';
 
 const INITIAL_STATE: PortfolioState = {
   totalAmount: {
     amount: 0,
-    currency: '원'
+    currency: '원화'
   },
   stocks: []
 };
 
-export function usePortfolio() {
+export const usePortfolio = () => {
   const [portfolio, setPortfolio] = useLocalStorage<PortfolioState>('portfolio', INITIAL_STATE);
+
+  const resetPortfolio = () => {
+    setPortfolio(INITIAL_STATE);
+  };
 
   const updateTotalAmount = (newAmount: TotalAmountType) => {
     setPortfolio(prev => ({
@@ -46,10 +51,6 @@ export function usePortfolio() {
     setPortfolio(newPortfolio);
   };
 
-  const clearPortfolio = () => {
-    setPortfolio(INITIAL_STATE);
-  };
-
   return {
     portfolio,
     updateTotalAmount,
@@ -57,6 +58,6 @@ export function usePortfolio() {
     deleteStock,
     updateStock,
     importPortfolio,
-    clearPortfolio
+    resetPortfolio
   };
-} 
+}; 

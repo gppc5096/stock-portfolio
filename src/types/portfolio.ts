@@ -1,4 +1,4 @@
-export type Currency = '원' | '달러' | '엔';
+export type Currency = '원화' | '달러' | '엔화' | '유로화';
 
 export interface TotalAmountType {
   amount: number;
