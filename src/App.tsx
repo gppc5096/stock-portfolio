@@ -6,6 +6,7 @@ import StockInput from './components/StockInput';
 import StockList from './components/StockList';
 import PieChart from './components/PieChart';
 import PortfolioManager from './components/PortfolioManager';
+import Footer from './components/Footer';
 import { usePortfolio } from './hooks/usePortfolio';
 import { StockType } from '@/types/portfolio';
 import styled from 'styled-components';
@@ -130,6 +131,8 @@ function App() {
           onDeleteStock={deleteStock}
           onEditStock={updateStock}
         />
+        
+        <Footer />
       </Container>
     </ThemeProvider>
   );
