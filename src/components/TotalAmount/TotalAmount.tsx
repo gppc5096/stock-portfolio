@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-import { TotalAmountType } from '@/types/portfolio';
+import { TotalAmountProps, Currency, TotalAmountType } from '@/types/portfolio';
 
 const TotalAmountWrapper = styled.div`
   padding: ${props => props.theme.spacing.lg};
@@ -28,22 +28,9 @@ const ErrorMessage = styled.p`
   margin-top: ${props => props.theme.spacing.xs};
 `;
 
-const TotalAmount: React.FC = () => {
-  const [totalAmount, setTotalAmount] = useState<TotalAmountType>({
-    amount: 0,
-    currency: '원'
-  });
+const TotalAmount: React.FC<TotalAmountProps> = ({ totalAmount, onUpdate }) => {
   const [error, setError] = useState<string>('');
 
-  // LocalStorage에서 데이터 불러오기
-  useEffect(() => {
-    const savedAmount = localStorage.getItem('totalAmount');
-    if (savedAmount) {
-      setTotalAmount(JSON.parse(savedAmount));
-    }
-  }, []);
-
-  // 금액 변경 핸들러
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     const numValue = Number(value.replace(/[^0-9]/g, ''));
@@ -59,20 +46,19 @@ const TotalAmount: React.FC = () => {
     }
 
     setError('');
-    setTotalAmount(prev => {
-      const newAmount = { ...prev, amount: numValue };
-      localStorage.setItem('totalAmount', JSON.stringify(newAmount));
-      return newAmount;
-    });
+    const newAmount: TotalAmountType = {
+      ...totalAmount,
+      amount: numValue
+    };
+    onUpdate(newAmount);
   };
 
-  // 통화 변경 핸들러
   const handleCurrencyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setTotalAmount(prev => {
-      const newAmount = { ...prev, currency: e.target.value as TotalAmountType['currency'] };
-      localStorage.setItem('totalAmount', JSON.stringify(newAmount));
-      return newAmount;
-    });
+    const newAmount: TotalAmountType = {
+      ...totalAmount,
+      currency: e.target.value as Currency
+    };
+    onUpdate(newAmount);
   };
 
   return (

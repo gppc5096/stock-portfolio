@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { StockType } from '@/types/portfolio';
+import { StockInputProps, StockType, ValidationResult } from '@/types/portfolio';
 
 const StockInputWrapper = styled.div`
   padding: ${props => props.theme.spacing.lg};
@@ -44,11 +44,7 @@ const ErrorMessage = styled.p`
   margin-top: ${props => props.theme.spacing.xs};
 `;
 
-interface StockInputProps {
-  onAddStock: (stock: StockType) => void;
-}
-
-const StockInput: React.FC<StockInputProps> = ({ onAddStock }) => {
+const StockInput: React.FC<StockInputProps> = ({ onAddStock, currency }) => {
   const [stockName, setStockName] = useState('');
   const [purchasePrice, setPurchasePrice] = useState('');
   const [amount, setAmount] = useState('');
@@ -82,7 +78,7 @@ const StockInput: React.FC<StockInputProps> = ({ onAddStock }) => {
       name: stockName.trim(),
       purchasePrice: numericPrice,
       amount: numericAmount,
-      currency: '원'
+      currency: currency
     };
 
     onAddStock(newStock);

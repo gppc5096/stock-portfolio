@@ -7,37 +7,23 @@ import StockList from './components/StockList';
 import PieChart from './components/PieChart';
 import PortfolioManager from './components/PortfolioManager';
 import { StockType } from './types/portfolio';
-import { useState, useEffect } from 'react';
+import { usePortfolio } from './hooks/usePortfolio';
 
 function App() {
-  const [stocks, setStocks] = useState<StockType[]>([]);
+  const {
+    portfolio,
+    updateTotalAmount,
+    addStock,
+    deleteStock,
+    updateStock,
+    importPortfolio
+  } = usePortfolio();
 
-  useEffect(() => {
-    const savedStocks = localStorage.getItem('stocks');
-    if (savedStocks) {
-      setStocks(JSON.parse(savedStocks));
-    }
-  }, []);
-
-  const handleAddStock = (newStock: StockType) => {
-    setStocks(prevStocks => {
-      const updatedStocks = [...prevStocks, newStock];
-      localStorage.setItem('stocks', JSON.stringify(updatedStocks));
-      return updatedStocks;
+  const handleImportStocks = (stocks: StockType[]) => {
+    importPortfolio({
+      totalAmount: portfolio.totalAmount,
+      stocks
     });
-  };
-
-  const handleDeleteStock = (id: string) => {
-    setStocks(prevStocks => {
-      const updatedStocks = prevStocks.filter(stock => stock.id !== id);
-      localStorage.setItem('stocks', JSON.stringify(updatedStocks));
-      return updatedStocks;
-    });
-  };
-
-  const handleImportStocks = (importedStocks: StockType[]) => {
-    setStocks(importedStocks);
-    localStorage.setItem('stocks', JSON.stringify(importedStocks));
   };
 
   return (
@@ -45,11 +31,23 @@ function App() {
       <GlobalStyle />
       <div className="App">
         <h1>주식 포트폴리오 관리</h1>
-        <TotalAmount />
-        <PortfolioManager stocks={stocks} onImport={handleImportStocks} />
-        <StockInput onAddStock={handleAddStock} />
-        <PieChart stocks={stocks} />
-        <StockList stocks={stocks} onDeleteStock={handleDeleteStock} />
+        <TotalAmount 
+          totalAmount={portfolio.totalAmount} 
+          onUpdate={updateTotalAmount} 
+        />
+        <PortfolioManager 
+          stocks={portfolio.stocks}
+          onImport={handleImportStocks}
+        />
+        <StockInput 
+          onAddStock={addStock} 
+          currency={portfolio.totalAmount.currency} 
+        />
+        <PieChart stocks={portfolio.stocks} />
+        <StockList 
+          stocks={portfolio.stocks} 
+          onDeleteStock={deleteStock}
+        />
       </div>
     </ThemeProvider>
   );
