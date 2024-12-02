@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useLocalStorage } from './useLocalStorage';
 import { PortfolioState, StockType, TotalAmountType } from '@/types/portfolio';
 
-const INITIAL_STATE: PortfolioState = {
+export const INITIAL_STATE: PortfolioState = {
   totalAmount: {
     amount: 0,
     currency: '원화'
@@ -13,15 +13,17 @@ const INITIAL_STATE: PortfolioState = {
 export const usePortfolio = () => {
   const [portfolio, setPortfolio] = useLocalStorage<PortfolioState>('portfolio', INITIAL_STATE);
 
-  const resetPortfolio = () => {
-    setPortfolio(INITIAL_STATE);
-  };
-
-  const updateTotalAmount = (newAmount: TotalAmountType) => {
+  const updateTotalAmount = (totalAmount: TotalAmountType) => {
     setPortfolio(prev => ({
       ...prev,
-      totalAmount: newAmount
+      totalAmount
     }));
+  };
+
+  const resetPortfolio = () => {
+    setPortfolio(INITIAL_STATE);
+    // 로컬 스토리지도 초기화
+    localStorage.setItem('portfolio', JSON.stringify(INITIAL_STATE));
   };
 
   const addStock = (stock: StockType) => {

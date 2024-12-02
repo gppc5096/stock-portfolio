@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { TotalAmountProps, Currency } from '@/types/portfolio';
 import { formatNumber, parseNumber } from '../../utils/calculations';
@@ -158,6 +158,11 @@ const TotalAmount: React.FC<TotalAmountProps> = ({
   const [currency, setCurrency] = useState<Currency>(totalAmount.currency);
   const [showMessage, setShowMessage] = useState(false);
 
+  useEffect(() => {
+    setAmount(totalAmount.amount.toString());
+    setCurrency(totalAmount.currency);
+  }, [totalAmount]);
+
   const getCurrencySymbol = (curr: Currency): string => {
     switch (curr) {
       case '원화':
@@ -188,7 +193,7 @@ const TotalAmount: React.FC<TotalAmountProps> = ({
   };
 
   const handleConfirm = () => {
-    const numericAmount = parseNumber(amount);
+    const numericAmount = parseNumber(amount || '0');
     onUpdate({
       amount: numericAmount,
       currency
@@ -222,7 +227,7 @@ const TotalAmount: React.FC<TotalAmountProps> = ({
       
       <MessageBox show={showMessage}>
         <MessageText>
-          설정된 총 투자금액은 {getCurrencySymbol(currency)}{formatNumber(parseNumber(amount))}{currency === '원화' ? '원' : currency}입니다.
+          설정된 총 투자금액은 {getCurrencySymbol(currency)}{formatNumber(parseNumber(amount || '0'))}{currency === '원화' ? '원' : currency}입니다.
           <br />
           설정된 투자금액에 맞추어 포트폴리오를 작성하십시오.
         </MessageText>

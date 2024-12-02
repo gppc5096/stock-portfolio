@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ThemeProvider } from 'styled-components';
 import { GlobalStyle } from './styles/GlobalStyle';
 import { darkTheme } from './styles/theme';
@@ -8,8 +8,8 @@ import StockList from './components/StockList';
 import PieChart from './components/PieChart';
 import PortfolioManager from './components/PortfolioManager';
 import Footer from './components/Footer';
-import { usePortfolio } from './hooks/usePortfolio';
-import { StockType, Currency } from '@/types/portfolio';
+import { usePortfolio, INITIAL_STATE } from './hooks/usePortfolio';
+import { StockType, Currency, PortfolioState } from '@/types/portfolio';
 import styled from 'styled-components';
 
 const Container = styled.div`
@@ -103,6 +103,11 @@ function App() {
   } = usePortfolio();
 
   const [currentCurrency, setCurrentCurrency] = useState<Currency>(portfolio.totalAmount.currency);
+  const [currentPortfolio, setCurrentPortfolio] = useState<PortfolioState>(portfolio);
+
+  useEffect(() => {
+    setCurrentPortfolio(portfolio);
+  }, [portfolio]);
 
   const handleCurrencyChange = (currency: Currency) => {
     setCurrentCurrency(currency);
@@ -113,11 +118,22 @@ function App() {
     handleCurrencyChange(totalAmount.currency);
   };
 
-  const handleImportStocks = (stocks: StockType[]) => {
-    importPortfolio({
-      totalAmount: portfolio.totalAmount,
-      stocks
-    });
+  const handleReset = () => {
+    resetPortfolio();
+    setCurrentCurrency('원화');
+    handleTotalAmountUpdate(INITIAL_STATE.totalAmount);
+    setCurrentPortfolio(INITIAL_STATE);
+    localStorage.clear();
+    localStorage.setItem('portfolio', JSON.stringify(INITIAL_STATE));
+    window.location.reload();
+  };
+
+  const handleImport = (stocks: StockType[]) => {
+    const newPortfolio: PortfolioState = {
+      ...portfolio,
+      stocks: stocks
+    };
+    importPortfolio(newPortfolio);
   };
 
   return (
@@ -129,7 +145,7 @@ function App() {
         <TopGrid>
           <DashboardCard>
             <TotalAmount 
-              totalAmount={portfolio.totalAmount} 
+              totalAmount={currentPortfolio.totalAmount} 
               onUpdate={handleTotalAmountUpdate}
               onCurrencyChange={handleCurrencyChange}
             />
@@ -139,19 +155,19 @@ function App() {
             <StockInput 
               onAddStock={addStock} 
               currency={currentCurrency}
-              totalAmount={portfolio.totalAmount.amount}
-              stocks={portfolio.stocks}
+              totalAmount={currentPortfolio.totalAmount.amount}
+              stocks={currentPortfolio.stocks}
             />
           </DashboardCard>
         </TopGrid>
 
         <Section>
-          <PieChart stocks={portfolio.stocks} />
+          <PieChart stocks={currentPortfolio.stocks} />
         </Section>
 
         <StockListSection>
           <StockList 
-            stocks={portfolio.stocks} 
+            stocks={currentPortfolio.stocks} 
             onDeleteStock={deleteStock}
             onEditStock={updateStock}
           />
@@ -159,9 +175,9 @@ function App() {
 
         <ManagerSection>
           <PortfolioManager 
-            stocks={portfolio.stocks}
-            onImport={handleImportStocks}
-            onReset={resetPortfolio}
+            stocks={currentPortfolio.stocks}
+            onImport={handleImport}
+            onReset={handleReset}
           />
         </ManagerSection>
 
