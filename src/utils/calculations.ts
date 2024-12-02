@@ -1,96 +1,48 @@
-import { StockType, Currency } from '@/types/portfolio';
+import { StockType } from '@/types/portfolio';
 
-// 포트폴리오 총 가치 계산
-export const calculateTotalValue = (stocks: StockType[]): number => {
+export const parseNumber = (value: string): number => {
+  return parseInt(value.replace(/,/g, ''), 10);
+};
+
+export const calculateTotalInvestment = (stocks: StockType[]): number => {
   return stocks.reduce((total, stock) => {
-    return total + (stock.amount * stock.purchasePrice);
+    return total + (stock.purchasePrice * stock.amount);
   }, 0);
 };
 
-// 각 종목의 비중 계산
-export const calculateStockWeight = (
-  stock: StockType,
-  totalValue: number
-): number => {
-  const stockValue = stock.amount * stock.purchasePrice;
-  return totalValue > 0 ? (stockValue / totalValue) * 100 : 0;
+export const calculateRemainingAmount = (totalAmount: number, stocks: StockType[]): number => {
+  const currentTotal = calculateTotalInvestment(stocks);
+  return totalAmount - currentTotal;
 };
 
-// 포트폴리오 비중 데이터 생성
+export const formatNumber = (num: number): string => {
+  return new Intl.NumberFormat('ko-KR').format(num);
+};
+
 export const generatePortfolioWeights = (stocks: StockType[]) => {
-  const totalValue = calculateTotalValue(stocks);
-  
+  const totalInvestment = calculateTotalInvestment(stocks);
   return stocks.map(stock => ({
-    id: stock.id,
     name: stock.name,
-    value: stock.amount * stock.purchasePrice,
-    weight: calculateStockWeight(stock, totalValue),
-    currency: stock.currency
+    weight: ((stock.purchasePrice * stock.amount) / totalInvestment) * 100
   }));
 };
 
-// 통화별 금액 변환 (환율은 실제 API에서 가져와야 함)
-export const convertCurrency = (
-  amount: number,
-  fromCurrency: Currency,
-  toCurrency: Currency
-): number => {
-  const exchangeRates: Record<Currency, number> = {
-    '원화': 1,
-    '달러': 1300, // 예시 환율
-    '엔화': 9.5,  // 예시 환율
-    '유로화': 1400 // 예시 환율
-  };
-
-  const amountInWon = fromCurrency === '원화'
-    ? amount 
-    : amount * exchangeRates[fromCurrency];
-  
-  return toCurrency === '원화'
-    ? amountInWon 
-    : amountInWon / exchangeRates[toCurrency];
-};
-
-// 숫자 포맷팅 (천단위 구분)
-export const formatNumber = (value: number): string => {
-  return new Intl.NumberFormat('ko-KR').format(value);
-};
-
-// 비중 포맷팅 (소수점 2자리)
-export const formatPercentage = (value: number): string => {
-  return `${value.toFixed(2)}%`;
-};
-
-// 포트폴리오 요약 정보 계산
 export const calculatePortfolioSummary = (stocks: StockType[]) => {
-  const totalValue = calculateTotalValue(stocks);
-  const stockCount = stocks.length;
-  const weights = generatePortfolioWeights(stocks);
-  
-  const highestWeight = weights.reduce((max, current) => 
-    current.weight > max.weight ? current : max
-  , weights[0]);
-
-  const lowestWeight = weights.reduce((min, current) => 
-    current.weight < min.weight ? current : min
-  , weights[0]);
-
-  return {
-    totalValue,
-    stockCount,
-    highestWeight: highestWeight?.name ? {
-      name: highestWeight.name,
-      weight: highestWeight.weight
-    } : null,
-    lowestWeight: lowestWeight?.name ? {
-      name: lowestWeight.name,
-      weight: lowestWeight.weight
-    } : null
-  };
+  return stocks.reduce((summary, stock) => {
+    const currency = stock.currency;
+    if (!summary[currency]) {
+      summary[currency] = {
+        totalAmount: 0,
+        totalValue: 0
+      };
+    }
+    summary[currency].totalAmount += stock.amount;
+    summary[currency].totalValue += stock.purchasePrice * stock.amount;
+    return summary;
+  }, {} as Record<string, { totalAmount: number; totalValue: number }>);
 };
 
-// 실시간 업데이트를 위한 디바운스 함수
-export const debounce = <T extends (...args: any[]) => void>(
+export const debounce = <T extends (...args: any[]) => any>(
   func: T,
   wait: number
 ): ((...args: Parameters<T>) => void) => {
@@ -100,4 +52,4 @@ export const debounce = <T extends (...args: any[]) => void>(
     clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
   };
-}; 
+};

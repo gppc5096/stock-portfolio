@@ -4,7 +4,7 @@ import {
   generatePortfolioWeights, 
   calculatePortfolioSummary,
   debounce 
-} from '@/utils/calculations';
+} from '../utils/calculations';
 
 export const usePortfolioCalculations = (stocks: StockType[]) => {
   const [weights, setWeights] = useState(generatePortfolioWeights(stocks));

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { v4 as uuidv4 } from 'uuid';
 import { StockType, Currency } from '@/types/portfolio';
+import { calculateTotalInvestment, calculateRemainingAmount, formatNumber, parseNumber } from '../../utils/calculations';
 
 const Input = styled.input`
   padding: ${props => props.theme.spacing.md};
@@ -58,37 +59,68 @@ const Button = styled.button`
   }
 `;
 
+const Message = styled.p<{ isError?: boolean }>`
+  color: ${props => props.isError ? props.theme.colors.error : props.theme.colors.text.secondary};
+  font-size: 0.875rem;
+  margin-top: ${props => props.theme.spacing.sm};
+`;
+
 interface StockInputProps {
   onAddStock: (stock: StockType) => void;
   currency: Currency;
+  totalAmount: number;
+  stocks: StockType[];
 }
 
-const StockInput: React.FC<StockInputProps> = ({ onAddStock, currency: defaultCurrency }) => {
+const StockInput: React.FC<StockInputProps> = ({ onAddStock, currency: defaultCurrency, totalAmount, stocks }) => {
   const [formData, setFormData] = useState({
     name: '',
     purchasePrice: '',
     amount: '',
     currency: defaultCurrency
   });
+  const [message, setMessage] = useState<{ text: string; isError: boolean } | null>(null);
 
-  const removeCommas = (value: string): string => {
-    return value.replace(/,/g, '');
-  };
+  const checkAmount = (price: string, amount: string) => {
+    if (!price || !amount) return;
 
-  const addCommas = (value: string): string => {
-    const numericValue = value.replace(/[^0-9]/g, '');
-    return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    const numericPrice = parseNumber(price);
+    const numericAmount = parseNumber(amount);
+    const newInvestment = numericPrice * numericAmount;
+    const currentTotal = calculateTotalInvestment(stocks);
+    const remainingBefore = totalAmount - currentTotal;
+    
+    if (newInvestment > remainingBefore) {
+      const excess = newInvestment - remainingBefore;
+      setMessage({
+        text: `총 투자금액보다 ${formatNumber(excess)}원이 많아 입력이 불가능합니다.`,
+        isError: true
+      });
+    } else {
+      const remaining = remainingBefore - newInvestment;
+      setMessage({
+        text: `총 투자금액 중 ${formatNumber(remaining)}원 추가로 입력 가능합니다.`,
+        isError: false
+      });
+    }
   };
 
   const handleChange = (field: string, value: string) => {
     if (field === 'purchasePrice' || field === 'amount') {
-      const numericValue = removeCommas(value);
-      const formattedValue = addCommas(numericValue);
+      const numericValue = value.replace(/[^0-9]/g, '');
+      const formattedValue = numericValue ? formatNumber(parseInt(numericValue)) : '';
       
       setFormData(prev => ({
         ...prev,
         [field]: formattedValue
       }));
+
+      // 실시간으로 투자 가능 금액 계산
+      if (field === 'purchasePrice' && formData.amount) {
+        checkAmount(formattedValue, formData.amount);
+      } else if (field === 'amount' && formData.purchasePrice) {
+        checkAmount(formData.purchasePrice, formattedValue);
+      }
     } else {
       setFormData(prev => ({
         ...prev,
@@ -105,11 +137,21 @@ const StockInput: React.FC<StockInputProps> = ({ onAddStock, currency: defaultCu
       return;
     }
 
+    const price = parseNumber(formData.purchasePrice);
+    const amount = parseNumber(formData.amount);
+    const newInvestment = price * amount;
+    const remainingAmount = calculateRemainingAmount(totalAmount, stocks);
+
+    if (newInvestment > remainingAmount) {
+      alert(`투자 가능 금액(${formatNumber(remainingAmount)}원)을 초과할 수 없습니다.`);
+      return;
+    }
+
     const newStock: StockType = {
       id: uuidv4(),
       name: formData.name,
-      purchasePrice: Number(removeCommas(formData.purchasePrice)),
-      amount: Number(removeCommas(formData.amount)),
+      purchasePrice: price,
+      amount: amount,
       currency: formData.currency
     };
 
@@ -120,6 +162,7 @@ const StockInput: React.FC<StockInputProps> = ({ onAddStock, currency: defaultCu
       amount: '',
       currency: defaultCurrency
     });
+    setMessage(null);
   };
 
   return (
@@ -152,6 +195,11 @@ const StockInput: React.FC<StockInputProps> = ({ onAddStock, currency: defaultCu
         <option value="엔화">엔화</option>
         <option value="유로화">유로화</option>
       </Select>
+      {message && (
+        <Message isError={message.isError}>
+          {message.text}
+        </Message>
+      )}
       <Button type="submit">추가</Button>
     </form>
   );

@@ -62,7 +62,7 @@ const DashboardCard = styled.div`
   }
 `;
 
-const ChartSection = styled.div`
+const Section = styled.section`
   background: ${props => props.theme.colors.surface};
   border-radius: 12px;
   padding: ${props => props.theme.spacing.lg};
@@ -70,8 +70,24 @@ const ChartSection = styled.div`
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 `;
 
-const ManagerSection = styled(DashboardCard)`
-  margin-bottom: ${props => props.theme.spacing.xl};
+const StockListSection = styled(Section)`
+  h2 {
+    color: ${props => props.theme.colors.text.primary};
+    font-size: 1.25rem;
+    margin-bottom: ${props => props.theme.spacing.md};
+    padding-bottom: ${props => props.theme.spacing.sm};
+    border-bottom: 2px solid ${props => props.theme.colors.primary};
+  }
+`;
+
+const ManagerSection = styled(Section)`
+  h2 {
+    color: ${props => props.theme.colors.text.primary};
+    font-size: 1.25rem;
+    margin-bottom: ${props => props.theme.spacing.md};
+    padding-bottom: ${props => props.theme.spacing.sm};
+    border-bottom: 2px solid ${props => props.theme.colors.secondary};
+  }
 `;
 
 function App() {
@@ -109,14 +125,24 @@ function App() {
           <DashboardCard>
             <StockInput 
               onAddStock={addStock} 
-              currency={portfolio.totalAmount.currency} 
+              currency={portfolio.totalAmount.currency}
+              totalAmount={portfolio.totalAmount.amount}
+              stocks={portfolio.stocks}
             />
           </DashboardCard>
         </TopGrid>
 
-        <ChartSection>
+        <Section>
           <PieChart stocks={portfolio.stocks} />
-        </ChartSection>
+        </Section>
+
+        <StockListSection>
+          <StockList 
+            stocks={portfolio.stocks} 
+            onDeleteStock={deleteStock}
+            onEditStock={updateStock}
+          />
+        </StockListSection>
 
         <ManagerSection>
           <PortfolioManager 
@@ -126,12 +152,6 @@ function App() {
           />
         </ManagerSection>
 
-        <StockList 
-          stocks={portfolio.stocks} 
-          onDeleteStock={deleteStock}
-          onEditStock={updateStock}
-        />
-        
         <Footer />
       </Container>
     </ThemeProvider>
