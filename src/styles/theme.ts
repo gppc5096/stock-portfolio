@@ -22,7 +22,8 @@ export const darkTheme = {
     text: {
       primary: '#ffffff',
       secondary: '#b3b3b3'
-    }
+    },
+    success: '#90EE90'
   },
   spacing: {
     xs: '4px',

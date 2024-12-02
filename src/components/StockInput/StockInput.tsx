@@ -59,10 +59,11 @@ const Button = styled.button`
   }
 `;
 
-const Message = styled.p<{ isError?: boolean }>`
-  color: ${props => props.isError ? props.theme.colors.error : props.theme.colors.text.secondary};
-  font-size: 0.875rem;
-  margin-top: ${props => props.theme.spacing.sm};
+const MessageText = styled.p<{ isError: boolean }>`
+  margin: ${props => props.theme.spacing.sm} 0;
+  color: ${props => props.isError ? props.theme.colors.error : props.theme.colors.success};
+  font-size: 0.9rem;
+  transition: color 0.3s ease;
 `;
 
 interface StockInputProps {
@@ -88,6 +89,21 @@ const StockInput: React.FC<StockInputProps> = ({ onAddStock, currency, totalAmou
     }));
   }, [currency]);
 
+  const getCurrencyUnit = (curr: Currency): string => {
+    switch (curr) {
+      case '원화':
+        return '원';
+      case '달러':
+        return '달러';
+      case '엔화':
+        return '엔';
+      case '유로화':
+        return '유로';
+      default:
+        return '';
+    }
+  };
+
   const checkAmount = (price: string, amount: string) => {
     if (!price || !amount) return;
 
@@ -100,13 +116,13 @@ const StockInput: React.FC<StockInputProps> = ({ onAddStock, currency, totalAmou
     if (newInvestment > remainingBefore) {
       const excess = newInvestment - remainingBefore;
       setMessage({
-        text: `총 투자금액보다 ${formatNumber(excess)}원이 많아 입력이 불가능합니다.`,
+        text: `총 투자금액보다 ${formatNumber(excess)}${getCurrencyUnit(currency)}이(가) 많아 입력이 불가능합니다.`,
         isError: true
       });
     } else {
       const remaining = remainingBefore - newInvestment;
       setMessage({
-        text: `총 투자금액 중 ${formatNumber(remaining)}원 추가로 입력 가능합니다.`,
+        text: `총 투자금액 중 ${formatNumber(remaining)}${getCurrencyUnit(currency)} 추가로 입력 가능합니다.`,
         isError: false
       });
     }
@@ -150,7 +166,7 @@ const StockInput: React.FC<StockInputProps> = ({ onAddStock, currency, totalAmou
     const remainingAmount = calculateRemainingAmount(totalAmount, stocks);
 
     if (newInvestment > remainingAmount) {
-      alert(`투자 가능 금액(${formatNumber(remainingAmount)}원)을 초과할 수 없습니다.`);
+      alert(`투자 가능 금액(${formatNumber(remainingAmount)}${getCurrencyUnit(currency)})을 초과할 수 없습니다.`);
       return;
     }
 
@@ -204,9 +220,9 @@ const StockInput: React.FC<StockInputProps> = ({ onAddStock, currency, totalAmou
         <option value="유로화">유로화</option>
       </Select>
       {message && (
-        <Message isError={message.isError}>
+        <MessageText isError={message.isError}>
           {message.text}
-        </Message>
+        </MessageText>
       )}
       <Button type="submit">추가</Button>
     </form>
