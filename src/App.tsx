@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { ThemeProvider } from 'styled-components';
 import { GlobalStyle } from './styles/GlobalStyle';
 import { darkTheme } from './styles/theme';
@@ -8,7 +9,7 @@ import PieChart from './components/PieChart';
 import PortfolioManager from './components/PortfolioManager';
 import Footer from './components/Footer';
 import { usePortfolio } from './hooks/usePortfolio';
-import { StockType } from '@/types/portfolio';
+import { StockType, Currency } from '@/types/portfolio';
 import styled from 'styled-components';
 
 const Container = styled.div`
@@ -101,6 +102,17 @@ function App() {
     resetPortfolio
   } = usePortfolio();
 
+  const [currentCurrency, setCurrentCurrency] = useState<Currency>(portfolio.totalAmount.currency);
+
+  const handleCurrencyChange = (currency: Currency) => {
+    setCurrentCurrency(currency);
+  };
+
+  const handleTotalAmountUpdate = (totalAmount: { amount: number; currency: Currency }) => {
+    updateTotalAmount(totalAmount);
+    handleCurrencyChange(totalAmount.currency);
+  };
+
   const handleImportStocks = (stocks: StockType[]) => {
     importPortfolio({
       totalAmount: portfolio.totalAmount,
@@ -118,14 +130,15 @@ function App() {
           <DashboardCard>
             <TotalAmount 
               totalAmount={portfolio.totalAmount} 
-              onUpdate={updateTotalAmount} 
+              onUpdate={handleTotalAmountUpdate}
+              onCurrencyChange={handleCurrencyChange}
             />
           </DashboardCard>
           
           <DashboardCard>
             <StockInput 
               onAddStock={addStock} 
-              currency={portfolio.totalAmount.currency}
+              currency={currentCurrency}
               totalAmount={portfolio.totalAmount.amount}
               stocks={portfolio.stocks}
             />

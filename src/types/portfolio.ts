@@ -5,11 +5,17 @@ export interface TotalAmountType {
   currency: Currency;
 }
 
+export interface TotalAmountProps {
+  totalAmount: TotalAmountType;
+  onUpdate: (totalAmount: TotalAmountType) => void;
+  onCurrencyChange: (currency: Currency) => void;
+}
+
 export interface StockType {
   id: string;
   name: string;
-  amount: number;
   purchasePrice: number;
+  amount: number;
   currency: Currency;
 }
 
@@ -22,11 +28,6 @@ export interface ChartDataItem {
   name: string;
   value: number;
   percentage: number;
-}
-
-export interface TotalAmountProps {
-  totalAmount: TotalAmountType;
-  onUpdate: (amount: TotalAmountType) => void;
 }
 
 export interface StockInputProps {

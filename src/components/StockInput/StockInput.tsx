@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { v4 as uuidv4 } from 'uuid';
 import { StockType, Currency } from '@/types/portfolio';
@@ -72,14 +72,21 @@ interface StockInputProps {
   stocks: StockType[];
 }
 
-const StockInput: React.FC<StockInputProps> = ({ onAddStock, currency: defaultCurrency, totalAmount, stocks }) => {
+const StockInput: React.FC<StockInputProps> = ({ onAddStock, currency, totalAmount, stocks }) => {
   const [formData, setFormData] = useState({
     name: '',
     purchasePrice: '',
     amount: '',
-    currency: defaultCurrency
+    currency: currency
   });
   const [message, setMessage] = useState<{ text: string; isError: boolean } | null>(null);
+
+  useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      currency: currency
+    }));
+  }, [currency]);
 
   const checkAmount = (price: string, amount: string) => {
     if (!price || !amount) return;
@@ -160,7 +167,7 @@ const StockInput: React.FC<StockInputProps> = ({ onAddStock, currency: defaultCu
       name: '',
       purchasePrice: '',
       amount: '',
-      currency: defaultCurrency
+      currency: currency
     });
     setMessage(null);
   };
@@ -189,6 +196,7 @@ const StockInput: React.FC<StockInputProps> = ({ onAddStock, currency: defaultCu
       <Select 
         value={formData.currency}
         onChange={(e) => handleChange('currency', e.target.value as Currency)}
+        disabled
       >
         <option value="원화">원화</option>
         <option value="달러">달러</option>
